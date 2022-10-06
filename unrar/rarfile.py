@@ -22,21 +22,22 @@ import io
 import os
 import sys
 
-from unrar import constants
-from unrar import unrarlib
-
+from unrar import constants, unrarlib
 
 __all__ = ["BadRarFile", "is_rarfile", "RarFile", "RarInfo"]
 
 
-if sys.version < '3':
+if sys.version < "3":
+
     def b(x):
         return x
+
 else:
+
     def b(x):
         if x is not None:
             # encode using DOS OEM standard
-            return x.encode('cp437')
+            return x.encode("cp437")
 
 
 class BadRarFile(Exception):
@@ -52,24 +53,25 @@ def is_rarfile(filename):
     except unrarlib.UnrarException:
         return False
     unrarlib.RARCloseArchive(handle)
-    return (archive.OpenResult == constants.SUCCESS)
+    return archive.OpenResult == constants.SUCCESS
 
 
 class RarInfo(object):
     """Class with attributes describing each member in the RAR archive."""
 
     __slots__ = (
-        'filename',
-        'date_time',
-        'compress_type',
-        'comment',
-        'create_system',
-        'extract_version',
-        'flag_bits',
-        'CRC',
-        'compress_size',
-        'file_size',
-        '_raw_time',
+        "filename",
+        "date_time",
+        "compress_type",
+        "comment",
+        "create_system",
+        "extract_version",
+        "flag_bits",
+        "hash",
+        "CRC",
+        "compress_size",
+        "file_size",
+        "_raw_time",
     )
 
     def __init__(self, header):
@@ -83,6 +85,7 @@ class RarInfo(object):
         self.extract_version = header.UnpVer
         self.CRC = header.FileCRC
         self.flag_bits = header.Flags
+        self.hash = header.Hash
         if header.CmtState == constants.RAR_COMMENTS_SUCCESS:
             self.comment = header.CmtBuf.value
         else:
@@ -98,28 +101,27 @@ class _ReadIntoMemory(object):
         self._missing_password = False
 
     def _callback(self, msg, user_data, p1, p2):
-        if (msg == constants.UCM_NEEDPASSWORD or
-            msg == constants.UCM_NEEDPASSWORDW):
+        if msg == constants.UCM_NEEDPASSWORD or msg == constants.UCM_NEEDPASSWORDW:
             # This is a work around since libunrar doesn't
             # properly return the error code when files are encrypted
             self._missing_password = True
         elif msg == constants.UCM_PROCESSDATA:
             if self._data is None:
-                self._data = b('')
+                self._data = b("")
             chunk = (ctypes.c_char * p2).from_address(p1).raw
             self._data += chunk
         return 1
 
     def get_bytes(self):
         if self._missing_password:
-            raise RuntimeError('File is encrypted, password required for extraction')
+            raise RuntimeError("File is encrypted, password required for extraction")
         return io.BytesIO(self._data)
 
 
 class RarFile(object):
     """RAR archive file."""
 
-    def __init__(self, filename, mode='r', pwd=None):
+    def __init__(self, filename, mode="r", pwd=None):
         """Load RAR archive file with mode read only "r"."""
         self.filename = filename
         mode = constants.RAR_OM_LIST_INCSPLIT
@@ -139,7 +141,7 @@ class RarFile(object):
             self.comment = None
         self._load_metadata(handle)
         self._close(handle)
-    
+
     def __enter__(self):
         return self
 
@@ -194,13 +196,14 @@ class RarFile(object):
     def open(self, member, pwd=None):
         """Return file-like object for 'member'.
 
-           'member' may be a filename or a RarInfo object.
+        'member' may be a filename or a RarInfo object.
         """
         if isinstance(member, RarInfo):
             member = member.filename
 
         archive = unrarlib.RAROpenArchiveDataEx(
-            self.filename, mode=constants.RAR_OM_EXTRACT)
+            self.filename, mode=constants.RAR_OM_EXTRACT
+        )
         handle = self._open(archive)
 
         password = pwd or self.pwd
@@ -241,7 +244,7 @@ class RarFile(object):
             self._close(handle)
 
         if data is None:
-            raise KeyError('There is no item named %r in the archive' % member)
+            raise KeyError("There is no item named %r in the archive" % member)
 
         # return file-like object
         return data.get_bytes()
@@ -265,7 +268,7 @@ class RarFile(object):
         """Return the instance of RarInfo given 'name'."""
         rarinfo = self.NameToInfo.get(name)
         if rarinfo is None:
-            raise KeyError('There is no item named %r in the archive' % name)
+            raise KeyError("There is no item named %r in the archive" % name)
         return rarinfo
 
     def infolist(self):
@@ -278,15 +281,15 @@ class RarFile(object):
         print("%-46s %19s %12s" % ("File Name", "Modified    ", "Size"))
         for rarinfo in self.filelist:
             date = "%d-%02d-%02d %02d:%02d:%02d" % rarinfo.date_time[:6]
-            print("%-46s %s %12d" % (
-                rarinfo.filename, date, rarinfo.file_size))
+            print("%-46s %s %12d" % (rarinfo.filename, date, rarinfo.file_size))
 
     def testrar(self):
         """Read all the files and check the CRC."""
         error = None
         rarinfo = None
         archive = unrarlib.RAROpenArchiveDataEx(
-            self.filename, mode=constants.RAR_OM_EXTRACT)
+            self.filename, mode=constants.RAR_OM_EXTRACT
+        )
         handle = self._open(archive)
 
         if self.pwd:
@@ -305,9 +308,9 @@ class RarFile(object):
 
     def extract(self, member, path=None, pwd=None):
         """Extract a member from the archive to the current working directory,
-           using its full name. Its file information is extracted as accurately
-           as possible. `member' may be a filename or a RarInfo object. You can
-           specify a different directory using `path'.
+        using its full name. Its file information is extracted as accurately
+        as possible. `member' may be a filename or a RarInfo object. You can
+        specify a different directory using `path'.
         """
         if isinstance(member, RarInfo):
             member = member.filename
@@ -320,9 +323,9 @@ class RarFile(object):
 
     def extractall(self, path=None, members=None, pwd=None):
         """Extract all members from the archive to the current working
-           directory. `path' specifies a different directory to extract to.
-           `members' is optional and must be a subset of the list returned
-           by namelist().
+        directory. `path' specifies a different directory to extract to.
+        `members' is optional and must be a subset of the list returned
+        by namelist().
         """
         if members is None:
             members = self.namelist()
@@ -330,10 +333,11 @@ class RarFile(object):
 
     def _extract_members(self, members, targetpath, pwd):
         """Extract the RarInfo objects 'members' to a physical
-           file on the path targetpath.
+        file on the path targetpath.
         """
         archive = unrarlib.RAROpenArchiveDataEx(
-            self.filename, mode=constants.RAR_OM_EXTRACT)
+            self.filename, mode=constants.RAR_OM_EXTRACT
+        )
         handle = self._open(archive)
 
         password = pwd or self.pwd
@@ -344,8 +348,7 @@ class RarFile(object):
             rarinfo = self._read_header(handle)
             while rarinfo is not None:
                 if rarinfo.filename in members:
-                    self._process_current(
-                        handle, constants.RAR_EXTRACT, targetpath)
+                    self._process_current(handle, constants.RAR_EXTRACT, targetpath)
                 else:
                     self._process_current(handle, constants.RAR_SKIP)
                 rarinfo = self._read_header(handle)
@@ -363,14 +366,17 @@ class RarFile(object):
 
 def main(args=None):
     import textwrap
-    USAGE = textwrap.dedent("""\
+
+    USAGE = textwrap.dedent(
+        """\
         Usage:
             rarfile.py -l rarfile.rar        # Show listing of a rarfile
             rarfile.py -t rarfile.rar        # Test if a rarfile is valid
             rarfile.py -e rarfile.rar target # Extract rarfile into target dir
-        """)
+        """
+    )
 
-    valid_args = {'-l': 2, '-e': 3, '-t': 2}
+    valid_args = {"-l": 2, "-e": 3, "-t": 2}
     if args is None:
         args = sys.argv[1:]
 
@@ -379,20 +385,20 @@ def main(args=None):
         print(USAGE)
         sys.exit(1)
 
-    if cmd == '-l':
+    if cmd == "-l":
         # list
-        rf = RarFile(args[1], 'r')
+        rf = RarFile(args[1], "r")
         rf.printdir()
-    elif cmd == '-t':
+    elif cmd == "-t":
         # test
-        rf = RarFile(args[1], 'r')
+        rf = RarFile(args[1], "r")
         err = rf.testrar()
         if err:
             print("The following enclosed file is corrupted: {!r}".format(err))
         print("Done testing")
-    elif cmd == '-e':
+    elif cmd == "-e":
         # extract
-        rf = RarFile(args[1], 'r')
+        rf = RarFile(args[1], "r")
         dest = args[2]
         rf.extractall(path=dest)
 

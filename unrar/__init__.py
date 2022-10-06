@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Matias Bordese'
-__email__ = 'mbordese@gmail.com'
-__version__ = '0.4'
+__author__ = "Matias Bordese"
+__email__ = "mbordese@gmail.com"
+__version__ = "0.4"
 
 VERSION = __version__

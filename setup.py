@@ -20,23 +20,22 @@ import os
 
 from setuptools import find_packages, setup
 
-
 # metadata
-NAME = 'unrar'
-DESCRIPTION = 'Wrapper for UnRAR library, ctypes-based.'
-KEYWORDS = ['unrar', 'ctypes', 'rar']
-URL = 'http://github.com/matiasb/python-unrar'
-EMAIL = 'mbordese@gmail.com'
-AUTHOR = 'Matias Bordese'
-LICENSE = 'GPL-3'
+NAME = "unrar"
+DESCRIPTION = "Wrapper for UnRAR library, ctypes-based."
+KEYWORDS = ["unrar", "ctypes", "rar"]
+URL = "http://github.com/matiasb/python-unrar"
+EMAIL = "mbordese@gmail.com"
+AUTHOR = "Matias Bordese"
+LICENSE = "GPL-3"
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 # use README as the long-description
-with codecs.open(os.path.join(HERE, 'README.md'), "rb", "utf-8") as f:
+with codecs.open(os.path.join(HERE, "README.md"), "rb", "utf-8") as f:
     long_description = f.read()
 
-version = __import__('unrar').__version__
+version = __import__("unrar").__version__
 
 setup(
     name=NAME,
@@ -48,17 +47,17 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     url=URL,
-    packages=find_packages(exclude=('dependencies',)),
+    packages=find_packages(exclude=("dependencies",)),
     license=LICENSE,
     classifiers=[
-        'Intended Audience :: Developers',
-        'Development Status :: 4 - Beta',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        "Intended Audience :: Developers",
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
 )
