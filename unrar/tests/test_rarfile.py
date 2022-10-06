@@ -54,8 +54,7 @@ class TestRarFile(unittest.TestCase):
 
     def _open_rarfile(self):
         rar_filename = os.path.join(TESTS_DIR, 'test_rar.rar')
-        rar = RarFile(rar_filename)
-        return rar
+        return RarFile(rar_filename)
 
     def test_namelist(self):
         names = self.rar.namelist()
@@ -116,8 +115,7 @@ class TestPasswordRarFile(TestRarFile):
 
     def _open_rarfile(self):
         rar_filename = os.path.join(TESTS_DIR, 'test_password.rar')
-        rar = RarFile(rar_filename, pwd='password')
-        return rar
+        return RarFile(rar_filename, pwd='password')
 
 
 class TestRarSetPasswordFile(TestRarFile):
