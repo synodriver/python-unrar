@@ -41,8 +41,7 @@ if platform.system() == 'Windows':
     UNRARCALLBACK = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_uint,
                                        ctypes.c_long, ctypes.c_long,
                                        ctypes.c_long)
-    lib_path = lib_path or find_library("unrar.dll")
-    if lib_path:
+    if lib_path := lib_path or find_library("unrar.dll"):
         unrarlib = ctypes.WinDLL(lib_path)
 else:
     # assume unix
@@ -50,8 +49,7 @@ else:
     UNRARCALLBACK = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_uint,
                                      ctypes.c_long, ctypes.c_long,
                                      ctypes.c_long)
-    lib_path = lib_path or find_library("unrar")
-    if lib_path:
+    if lib_path := lib_path or find_library("unrar"):
         unrarlib = ctypes.cdll.LoadLibrary(lib_path)
     elif platform.system() == "Darwin":
         # maybe this is MacOS, check if library is installed by Homebrew.
@@ -63,8 +61,7 @@ else:
             # find latest available version
             latest_version = max(
                 version.parse(v) for v in os.listdir(BREW_UNRAR_PATH))
-            lib_path = "{}{}/lib/{}".format(
-                BREW_UNRAR_PATH, latest_version, LIB_FILENAME)
+            lib_path = f"{BREW_UNRAR_PATH}{latest_version}/lib/{LIB_FILENAME}"
             unrarlib = ctypes.cdll.LoadLibrary(lib_path)
         else:
             raise LookupError(
@@ -149,8 +146,8 @@ class _Structure(ctypes.Structure):
         res = []
         for field in self._fields_:
             field_value = repr(getattr(self, field[0]))
-            res.append('%s=%s' % (field[0], field_value))
-        return self.__class__.__name__ + '(' + ','.join(res) + ')'
+            res.append(f'{field[0]}={field_value}')
+        return f'{self.__class__.__name__}(' + ','.join(res) + ')'
 
 
 class RAROpenArchiveDataEx(_Structure):
