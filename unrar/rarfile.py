@@ -56,6 +56,10 @@ def is_rarfile(filename):
     return archive.OpenResult == constants.SUCCESS
 
 
+def version():
+    return unrarlib.RARGetDllVersion()
+
+
 class RarInfo(object):
     """Class with attributes describing each member in the RAR archive."""
 
