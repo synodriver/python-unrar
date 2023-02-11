@@ -98,8 +98,7 @@ class _ReadIntoMemory(object):
         self._missing_password = False
 
     def _callback(self, msg, user_data, p1, p2):
-        if (msg == constants.UCM_NEEDPASSWORD or
-            msg == constants.UCM_NEEDPASSWORDW):
+        if msg in [constants.UCM_NEEDPASSWORD, constants.UCM_NEEDPASSWORDW]:
             # This is a work around since libunrar doesn't
             # properly return the error code when files are encrypted
             self._missing_password = True
@@ -174,12 +173,10 @@ class RarFile(object):
 
     def _load_metadata(self, handle):
         """Load archive members metadata."""
-        rarinfo = self._read_header(handle)
-        while rarinfo:
+        while rarinfo := self._read_header(handle):
             self.filelist.append(rarinfo)
             self.NameToInfo[rarinfo.filename] = rarinfo
             self._process_current(handle, constants.RAR_SKIP)
-            rarinfo = self._read_header(handle)
 
     def _open(self, archive):
         """Open RAR archive file."""
@@ -241,7 +238,7 @@ class RarFile(object):
             else:
                 raise RuntimeError("File CRC error")
         except unrarlib.UnrarException as e:
-            raise BadRarFile("Bad RAR archive data: %s" % str(e))
+            raise BadRarFile(f"Bad RAR archive data: {str(e)}")
         finally:
             self._close(handle)
 
@@ -257,10 +254,7 @@ class RarFile(object):
 
     def namelist(self):
         """Return a list of file names in the archive."""
-        names = []
-        for member in self.filelist:
-            names.append(member.filename)
-        return names
+        return [member.filename for member in self.filelist]
 
     def setpassword(self, pwd):
         """Set default password for encrypted files."""
@@ -361,7 +355,7 @@ class RarFile(object):
         except unrarlib.BadDataError:
             raise RuntimeError("File CRC Error")
         except unrarlib.UnrarException as e:
-            raise BadRarFile("Bad RAR archive data: %s" % str(e))
+            raise BadRarFile(f"Bad RAR archive data: {str(e)}")
         finally:
             self._close(handle)
 
@@ -391,8 +385,7 @@ def main(args=None):
     elif cmd == '-t':
         # test
         rf = RarFile(args[1], 'r')
-        err = rf.testrar()
-        if err:
+        if err := rf.testrar():
             print("The following enclosed file is corrupted: {!r}".format(err))
         print("Done testing")
     elif cmd == '-e':
