@@ -101,7 +101,7 @@ class _ReadIntoMemory(object):
 
     def __init__(self):
         super(_ReadIntoMemory, self).__init__()
-        self._data = None
+        self._data = bytearray()
         self._missing_password = False
 
     def _callback(self, msg, user_data, p1, p2):
@@ -110,10 +110,8 @@ class _ReadIntoMemory(object):
             # properly return the error code when files are encrypted
             self._missing_password = True
         elif msg == constants.UCM_PROCESSDATA:
-            if self._data is None:
-                self._data = b("")
             chunk = (ctypes.c_char * p2).from_address(p1).raw
-            self._data += chunk
+            self._data.extend(chunk)
         return 1
 
     def get_bytes(self):
