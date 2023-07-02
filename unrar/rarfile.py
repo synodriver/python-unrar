@@ -37,7 +37,7 @@ else:
     def b(x):
         if x is not None:
             # encode using DOS OEM standard
-            return x.encode("cp437")
+            return x.encode("cp437") if isinstance(x, str) else x
 
 
 class BadRarFile(Exception):
